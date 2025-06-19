@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Stok</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(-45deg, #f3e5f5, #ce93d8, #ba68c8, #ab47bc);
+      background-size: 400% 400%;
+      animation: gradientBG 10s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .nav {
+      margin-bottom: 20px;
+    }
+
+    .nav button {
+      background: #8e24aa;
+      border: none;
+      padding: 10px 20px;
+      margin-right: 10px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .nav button:hover {
+      background: #6a1b9a;
+    }
+
+    h2 {
+      color: #4a148c;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button.add-btn {
+      background: linear-gradient(90deg, #8e24aa, #6a1b9a);
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    button.add-btn:hover {
+      background: linear-gradient(90deg, #6a1b9a, #4a148c);
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #8e24aa;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .padam-btn {
+      background: #d32f2f;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .padam-btn:hover {
+      background: #b71c1c;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="daftar-stok.html"><button>Daftar Stok</button></a>
+    <a href="stok-masuk.html"><button>Stok Masuk</button></a>
+    <a href="stok-keluar.html"><button>Stok Keluar</button></a>
+    <a href="laporan.html"><button>Laporan</button></a>
+    <a href="baki-stok.html"><button>Baki Stok</button></a>
+  </div>
+
+  <h2>Daftar Stok Baharu</h2>
+
+  <input type="text" id="noKod" placeholder="No Kod">
+  <input type="text" id="perihal" placeholder="Perihal Stok">
+  <input type="text" id="sku" placeholder="SKU">
+  <input type="text" id="pembungkusan" placeholder="Deskripsi Pembungkusan">
+  <button class="add-btn" onclick="daftarStok()">Daftar Stok</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>No Kod</th><th>Perihal</th><th>SKU</th><th>Pembungkusan</th><th>Tindakan</th>
+      </tr>
+    </thead>
+    <tbody id="senaraiStok"></tbody>
+  </table>
+
+  <script>
+    const user = localStorage.getItem("user") || "admin";
+    let stokBerdaftar = JSON.parse(localStorage.getItem("stokBerdaftar") || "[]");
+    const senaraiStok = document.getElementById("senaraiStok");
+
+    function daftarStok() {
+      const noKod = document.getElementById("noKod").value.trim();
+      const perihal = document.getElementById("perihal").value.trim();
+      const sku = document.getElementById("sku").value.trim();
+      const pembungkusan = document.getElementById("pembungkusan").value.trim();
+
+      if (!noKod || !perihal || !sku || !pembungkusan) {
+        return alert("Sila isi semua maklumat stok!");
+      }
+
+      const sudahWujud = stokBerdaftar.some(item => item.noKod === noKod);
+      if (sudahWujud) {
+        return alert("Stok dengan No Kod ini sudah wujud!");
+      }
+
+      const baru = { noKod, perihal, sku, pembungkusan, pengguna: user };
+      stokBerdaftar.push(baru);
+      localStorage.setItem("stokBerdaftar", JSON.stringify(stokBerdaftar));
+      location.reload();
+    }
+
+    function padamStok(index) {
+      if (confirm("Anda pasti mahu padam stok ini?")) {
+        stokBerdaftar.splice(index, 1);
+        localStorage.setItem("stokBerdaftar", JSON.stringify(stokBerdaftar));
+        location.reload();
+      }
+    }
+
+    function paparkanStok() {
+      senaraiStok.innerHTML = "";
+      stokBerdaftar.forEach((stok, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${stok.noKod}</td>
+          <td>${stok.perihal}</td>
+          <td>${stok.sku}</td>
+          <td>${stok.pembungkusan}</td>
+          <td><button class="padam-btn" onclick="padamStok(${index})">Padam</button></td>
+        `;
+        senaraiStok.appendChild(row);
+      });
+    }
+
+    paparkanStok();
+  </script>
+</body>
+</html>
